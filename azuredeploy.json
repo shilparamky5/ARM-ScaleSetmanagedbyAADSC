@@ -1,0 +1,552 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceLocation": {
+            "type": "string",
+            "defaultValue": "East US",
+            "allowedValues": [
+                "East US",
+                "East US 2",
+                "West US",
+                "Central US",
+                "South Central US",
+                "North Central US",
+                "North Europe",
+                "West Europe",
+                "Southeast Asia",
+                "East Asia",
+                "Japan West",
+                "Japan East",
+                "Brazil South",
+                "Australia East",
+                "Australia Southeast"
+            ],
+            "metadata": {
+                "description": "Azure region where all resources will be deployed. This is distinct from resource group location."
+            }
+        },
+        "vmSku": {
+            "type": "string",
+            "defaultValue": "Standard_A2",
+            "metadata": {
+                "description": "VM size for the VM Scale Set + the mgmt VM"
+            }
+        },
+        "windowsOSVersion": {
+            "type": "string",
+            "defaultValue": "2012-R2-Datacenter",
+            "metadata": {
+                "description": "The Windows Server version for the VM. This will pick a fully patched image of this given Windows version"
+            }
+        },
+        "vmssName": {
+            "type": "string",
+            "defaultValue": "aadsctest",
+            "metadata": {
+                "description": "String used as a base for naming resources (9 characters or less). A hash is prepended to this string for some resources, and resource-specific information is appended."
+            },
+            "maxLength": 9
+        },
+        "instanceCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of VM instances (100 or less)."
+            },
+            "maxValue": 100
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username on all VMs."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Admin password on all VMs."
+            }
+        },
+        "modulesUrl": {
+            "type": "string",
+            "defaultValue": "https://github.com/Azure/azure-quickstart-templates/raw/master/dsc-extension-azure-automation-pullserver/UpdateLCMforAAPull.zip",
+            "metadata": {
+                "description": "URL for the DSC configuration package. NOTE: Can be a Github url(raw) to the zip file (this is the default value)"
+            }
+        },
+        "configurationFunction": {
+            "type": "string",
+            "defaultValue": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
+            "metadata": {
+                "description": "DSC configuration function to call. Should contain filename and function in format fileName.ps1\\configurationfunction"
+            }
+        },
+        "registrationKey": {
+            "type": "string",
+            "metadata": {
+                "description": "Registration key to use to onboard to the Azure Automation DSC pull/reporting server"
+            }
+        },
+        "registrationUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "Registration url of the Azure Automation DSC pull/reporting server"
+            }
+        },
+        "nodeConfigurationName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the node configuration, on the Azure Automation DSC pull server, that this node will be configured as"
+            }
+        },
+        "configurationMode": {
+            "type": "string",
+            "defaultValue": "ApplyAndMonitor",
+            "allowedValues": [
+                "ApplyOnly",
+                "ApplyAndMonitor",
+                "ApplyAndAutoCorrect"
+            ],
+            "metadata": {
+                "description": "DSC agent (LCM) configuration mode setting. ApplyOnly, ApplyAndMonitor, or ApplyAndAutoCorrect"
+            }
+        },
+        "configurationModeFrequencyMins": {
+            "type": "int",
+            "defaultValue": 15,
+            "metadata": {
+                "description": "DSC agent (LCM) configuration mode frequency setting, in minutes"
+            }
+        },
+        "refreshFrequencyMins": {
+            "type": "int",
+            "defaultValue": 30,
+            "metadata": {
+                "description": "DSC agent (LCM) refresh frequency setting, in minutes"
+            }
+        },
+        "rebootNodeIfNeeded": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "DSC agent (LCM) rebootNodeIfNeeded setting"
+            }
+        },
+        "actionAfterReboot": {
+            "type": "string",
+            "defaultValue": "ContinueConfiguration",
+            "allowedValues": [
+                "ContinueConfiguration",
+                "StopConfiguration"
+            ],
+            "metadata": {
+                "description": "DSC agent (LCM) actionAfterReboot setting. ContinueConfiguration or StopConfiguration"
+            }
+        },
+        "allowModuleOverwrite": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "DSC agent (LCM) allowModuleOverwrite setting"
+            }
+        },
+        "timestamp": {
+            "type": "string",
+            "metadata": {
+                "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": "2015-06-15",
+        "storageAccountType": "Standard_LRS",
+        "saCount": 5,
+        "namingInfix": "[toLower(parameters('vmssName'))]",
+        "newStorageAccountSuffix": "[concat(variables('namingInfix'), 'sa')]",
+        "uniqueStringArray": [
+            "[concat(uniqueString(concat(resourceGroup().id, deployment().name, variables('newStorageAccountSuffix'), '0')))]",
+            "[concat(uniqueString(concat(resourceGroup().id, deployment().name, variables('newStorageAccountSuffix'), '1')))]",
+            "[concat(uniqueString(concat(resourceGroup().id, deployment().name, variables('newStorageAccountSuffix'), '2')))]",
+            "[concat(uniqueString(concat(resourceGroup().id, deployment().name, variables('newStorageAccountSuffix'), '3')))]",
+            "[concat(uniqueString(concat(resourceGroup().id, deployment().name, variables('newStorageAccountSuffix'), '4')))]"
+        ],
+        "vhdContainerName": "[concat(variables('namingInfix'), 'vhd')]",
+        "mgmtvmstorage": "vmssmgmtstor02",
+        "osDiskName": "[concat(variables('namingInfix'), 'osdisk')]",
+        "addressPrefix": "192.168.0.0/16",
+        "subnetPrefix": "192.168.0.0/24",
+        "virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualnetworks', variables('virtualNetworkName'))]",
+        "publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
+        "subnetName": "[concat(variables('namingInfix'), 'subnet')]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('subnetname'))]",
+        "loadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
+        "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
+        "natPoolName": "[concat(variables('namingInfix'), 'natpool')]",
+        "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
+        "natStartPort": 5000,
+        "natEndPort": 5099,
+        "natBackendPort": 80,
+        "nicName": "[concat(variables('namingInfix'), 'nic')]",
+        "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
+        "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+        "nsgname": "vmssnsg",
+        "vmvnicname": "vmssmgmtnic02",
+        "vmmgmtpubIP": "mypubip02",
+        "mgmtosdisk": "windisk",
+        "osType": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+        },
+        "imageReference": "[variables('osType')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgname'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgname'))]"
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgname')]",
+            "location": "[parameters('resourcelocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP-global",
+                        "properties": {
+                            "destinationAddressPrefix": "*",
+                            "sourceAddressPrefix": "*",
+                            "protocol": "Tcp",
+                            "direction": "Inbound",
+                            "sourcePortRange": "3389",
+                            "destinationPortRange": "3389",
+                            "access": "allow",
+                            "priority": "123"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('vmmgmtpubIP')]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('vmvnicname')]",
+            "location": "[parameters('resourcelocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('vmmgmtpubIP'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('vmmgmtpubIP'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetref')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('mgmtvmstorage')]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(variables('uniqueStringArray')[copyIndex()], variables('newStorageAccountSuffix'))]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "copy": {
+                "name": "storageLoop",
+                "count": "[variables('saCount')]"
+            },
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('namingInfix')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "name": "[variables('loadBalancerName')]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LoadBalancerFrontEnd",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[variables('publicIPAddressID')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('bePoolName')]"
+                    }
+                ],
+                "inboundNatPools": [
+                    {
+                        "name": "[variables('natPoolName')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigID')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": "[variables('natStartPort')]",
+                            "frontendPortRangeEnd": "[variables('natEndPort')]",
+                            "backendPort": "[variables('natBackendPort')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "vmssmgmtvm02",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('mgmtvmstorage'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('vmvnicname'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "computerName": "vmssmgmtvm01",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true
+                    }
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "name": "[variables('mgmtosdisk')]",
+                        "vhd": {
+                            "uri": "[concat('http://', variables('mgmtvmstorage'), '.blob.core.windows.net/', 'vhds', '/', 'osdisk.vhd')]"
+                        },
+                        "createOption": "FromImage",
+                        "caching": "readwrite"
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2012-R2-Datacenter",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkinterfaces', variables('vmvnicname'))]"
+                        }
+                    ]
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSku')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "name": "[variables('namingInfix')]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[3], variables('newStorageAccountSuffix'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[4], variables('newStorageAccountSuffix'))]",
+                "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+            ],
+            "sku": {
+                "name": "[parameters('vmSku')]",
+                "tier": "Standard",
+                "capacity": "[parameters('instanceCount')]"
+            },
+            "properties": {
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "vhdContainers": [
+                                "[concat('https://', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                                "[concat('https://', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                                "[concat('https://', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                                "[concat('https://', variables('uniqueStringArray')[3], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]",
+                                "[concat('https://', variables('uniqueStringArray')[4], variables('newStorageAccountSuffix'), '.blob.core.windows.net/', variables('vhdContainerName'))]"
+                            ],
+                            "name": "[variables('osDiskName')]",
+                            "caching": "ReadOnly",
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": "[variables('imageReference')]"
+                    },
+                 "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "dscExtension",
+                                "properties": [
+                                    {
+                                        "Name": "RegistrationKey",
+                                        "Value": {
+                                            "UserName": "PLACEHOLDER_DONOTUSE",
+                                            "Password": "PrivateSettingsRef:registrationKeyPrivate"
+                                        },
+                                        "TypeName": "System.Management.Automation.PSCredential"
+                                    },
+                                    {
+                                        "Name": "RegistrationUrl",
+                                        "Value": "[parameters('registrationUrl')]",
+                                        "TypeName": "System.String"
+                                    },
+                                    {
+                                        "Name": "NodeConfigurationName",
+                                        "Value": "[parameters('nodeConfigurationName')]",
+                                        "TypeName": "System.String"
+                                    },
+                                    {
+                                        "Name": "ConfigurationMode",
+                                        "Value": "[parameters('configurationMode')]",
+                                        "TypeName": "System.String"
+                                    },
+                                    {
+                                        "Name": "ConfigurationModeFrequencyMins",
+                                        "Value": "[parameters('configurationModeFrequencyMins')]",
+                                        "TypeName": "System.Int32"
+                                    },
+                                    {
+                                        "Name": "RefreshFrequencyMins",
+                                        "Value": "[parameters('refreshFrequencyMins')]",
+                                        "TypeName": "System.Int32"
+                                    },
+                                    {
+                                        "Name": "RebootNodeIfNeeded",
+                                        "Value": "[parameters('rebootNodeIfNeeded')]",
+                                        "TypeName": "System.Boolean"
+                                    },
+                                    {
+                                        "Name": "ActionAfterReboot",
+                                        "Value": "[parameters('actionAfterReboot')]",
+                                        "TypeName": "System.String"
+                                    },
+                                    {
+                                        "Name": "AllowModuleOverwrite",
+                                        "Value": "[parameters('allowModuleOverwrite')]",
+                                        "TypeName": "System.Boolean"
+                                    },
+                                    {
+                                        "Name": "Timestamp",
+                                        "Value": "[parameters('timestamp')]",
+                                        "TypeName": "System.String"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[variables('namingInfix')]",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "[variables('nicName')]",
+                                "properties": {
+                                    "primary": "true",
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "[variables('ipConfigName')]",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'), '/subnets/', variables('subnetName'))]"
+                                                },
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/backendAddressPools/', variables('bePoolName'))]"
+                                                    }
+                                                ],
+                                                "loadBalancerInboundNatPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('loadBalancerName'), '/inboundNatPools/', variables('natPoolName'))]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
