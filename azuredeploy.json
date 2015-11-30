@@ -42,7 +42,7 @@
         },
         "vmssName": {
             "type": "string",
-            "defaultValue": "VMScaleSet",
+            "defaultValue": "ScaleSet",
             "metadata": {
                 "description": "String used as a base for naming resources (9 characters or less). A hash is prepended to this string for some resources, and resource-specific information is appended."
             },
@@ -154,6 +154,7 @@
         },
         "timestamp": {
             "type": "string",
+            "defaultValue": "MM/dd/yyyy H:mm:ss tt",
             "metadata": {
                 "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
             }
