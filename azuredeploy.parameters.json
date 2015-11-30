@@ -12,10 +12,10 @@
             "value": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull"
         },
         "registrationKey": {
-            "value": "REQUIRED"
+            "value": ""
         },
         "registrationUrl": {
-            "value": "REQUIRED"
+            "value": ""
         },
         "nodeConfigurationName": {
             "value": ""

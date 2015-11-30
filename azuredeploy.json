@@ -96,6 +96,7 @@
         },
         "nodeConfigurationName": {
             "type": "string",
+            "defaultValue": "",
             "metadata": {
                 "description": "The name of the node configuration, on the Azure Automation DSC pull server, that this node will be configured as"
             }

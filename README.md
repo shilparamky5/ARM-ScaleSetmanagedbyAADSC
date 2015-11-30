@@ -14,4 +14,6 @@ This repo serves to prove an ARM template to deploy a VM Scale Set where virtual
 # From Azure PowerShell
 This commands assumes you want to either create a new Resource Group named "TestScaleSet0001", or deploy in to an existing Resource Group by that name.
     
-	New-AzureRmResourceGroupDeployment -Name TestScaleSets0001 -ResourceGroupName TestScaleSets0001 -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json -instanceCount 10
+	Login-AzureRmAccount
+	New-AzureRmResourcegroup -Name TestScaleSets0001 -Location 'East US' -Verbose
+	New-AzureRmResourceGroupDeployment -Name TestScaleSets0001 -ResourceGroupName TestScaleSets0001 -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json -instanceCount 10 -Verbose
