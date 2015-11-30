@@ -17,3 +17,9 @@ This commands assumes you want to either create a new Resource Group named "Test
 	Login-AzureRmAccount
 	New-AzureRmResourcegroup -Name TestScaleSets0001 -Location 'East US' -Verbose
 	New-AzureRmResourceGroupDeployment -Name TestScaleSets0001 -ResourceGroupName TestScaleSets0001 -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json -instanceCount 10 -Verbose
+	
+# To remove registered nodes after testing is complete
+Replace with values for your account.  The resource group in this case refers to the Azure Automation instance.
+
+	Login-AzureRmAccount
+	Get-AzureRMAutomationDSCNode -ResourceGroupName 'YOUR_RG_HERE' -AutomationAccountName 'YOUR_ACCOUNT_NAME_HERE' | ? Name -like YOUR_NAME_PATTERN_HERE-* | Unregister-AzureRmAutomationDscNode -Force
