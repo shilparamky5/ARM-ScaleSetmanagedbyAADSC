@@ -21,7 +21,7 @@
             "value": ""
         },
         "configurationMode": {
-            "value": "ApplyAndMonitor"
+            "value": "ApplyAndAutoCorrect"
         },
         "configurationModeFrequencyMins": {
             "value": 15
