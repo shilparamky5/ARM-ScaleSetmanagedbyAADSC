@@ -173,7 +173,7 @@
         "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
         "natStartPort": 5000,
         "natEndPort": 5099,
-        "natBackendPort": 80,
+        "natBackendPort": 5986,
         "nicName": "[concat(variables('namingInfix'), 'nic')]",
         "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
