@@ -1,9 +1,10 @@
 
 # Example ARM Template - VM Scale Set Configuration with Azure Automation
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmgreenegit%2FARM-ScaleSetmanagedbyAADSC%2Fmaster%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmgreenegit%2FARM-ScaleSetmanagedbyAADSC%2Fmaster%2Fazuredeploy.json)
+
+
+[![Build status](https://ci.appveyor.com/api/projects/status/4l7qavifq3v5ei7p?svg=true)](https://ci.appveyor.com/project/mgreenegit/arm-scalesetmanagedbyaadsc)
 
 This repo serves to prove an ARM template to deploy a VM Scale Set where virtual machines are deployed as registered nodes in the Azure Automation Desired State Configuration service, and node configuration is guaranteed consistency after deployment.
 
@@ -23,3 +24,8 @@ Replace with values for your account.  The resource group in this case refers to
 
 	Login-AzureRmAccount
 	Get-AzureRMAutomationDSCNode -ResourceGroupName 'YOUR_RG_HERE' -AutomationAccountName 'YOUR_ACCOUNT_NAME_HERE' | ? Name -like YOUR_NAME_PATTERN_HERE-* | Unregister-AzureRmAutomationDscNode -Force
+
+# Prior Examples
+
+[VM DSC Extension Azure Automation Pull Server](https://github.com/Azure/azure-quickstart-templates/tree/master/dsc-extension-azure-automation-pullserver)<br>
+[Deployment of Multiple VM Scale Sets of Windows VMs](https://github.com/Azure/azure-quickstart-templates/tree/02d32850258f5b172266896e498e30e8e526080a/301-multi-vmss-windows)
