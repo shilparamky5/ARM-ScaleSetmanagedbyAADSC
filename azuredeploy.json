@@ -160,15 +160,12 @@
             "[concat(uniqueString(concat(resourceGroup().id, deployment().name, variables('newStorageAccountSuffix'), '4')))]"
         ],
         "vhdContainerName": "[concat(variables('namingInfix'), 'vhd')]",
-        "mgmtvmstorage": "vmssmgmtstor02",
         "osDiskName": "[concat(variables('namingInfix'), 'osdisk')]",
         "addressPrefix": "192.168.0.0/16",
         "subnetPrefix": "192.168.0.0/24",
         "virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
-        "vnetID": "[resourceId('Microsoft.Network/virtualnetworks', variables('virtualNetworkName'))]",
         "publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
         "subnetName": "[concat(variables('namingInfix'), 'subnet')]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/', variables('subnetname'))]",
         "loadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
         "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
@@ -180,9 +177,6 @@
         "nicName": "[concat(variables('namingInfix'), 'nic')]",
         "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
-        "vmvnicname": "vmssmgmtnic02",
-        "vmmgmtpubIP": "mypubip02",
-        "mgmtosdisk": "windisk",
         "osType": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
@@ -192,6 +186,19 @@
         "imageReference": "[variables('osType')]"
     },
     "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(variables('uniqueStringArray')[copyIndex()], variables('newStorageAccountSuffix'))]",
+            "location": "[parameters('resourceLocation')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "copy": {
+                "name": "storageLoop",
+                "count": "[variables('saCount')]"
+            },
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
         {
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
@@ -211,37 +218,6 @@
                         }
                     }
                 ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('vmmgmtpubIP')]",
-            "location": "[parameters('resourceLocation')]",
-            "apiVersion": "[variables('apiVersion')]",
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic"
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('mgmtvmstorage')]",
-            "location": "[parameters('resourceLocation')]",
-            "apiVersion": "[variables('apiVersion')]",
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[concat(variables('uniqueStringArray')[copyIndex()], variables('newStorageAccountSuffix'))]",
-            "location": "[parameters('resourceLocation')]",
-            "apiVersion": "[variables('apiVersion')]",
-            "copy": {
-                "name": "storageLoop",
-                "count": "[variables('saCount')]"
-            },
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
             }
         },
         {
