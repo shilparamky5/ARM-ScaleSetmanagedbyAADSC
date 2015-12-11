@@ -12,10 +12,10 @@ Configuration webServer
 		xFirewall HTTP
 		{
             Name = 'HTTP'
-            DisplayGroup = 'HTTP'
+            Group = 'HTTP'
             Ensure = 'Present'
-            Access = 'Allow'
-            State = 'Enabled'
+            Action = 'Allow'
+            Enabled = 'True'
             Profile = 'Public'
             Direction = 'Inbound'
             Protocol = 'TCP'
