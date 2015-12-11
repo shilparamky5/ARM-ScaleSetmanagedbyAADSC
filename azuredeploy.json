@@ -198,13 +198,6 @@
             "metadata": {
                 "description": "the job id to compile the configuration"
             }
-        },
-        "jobConfigurationData": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Escaped Json of DSC ConfigurationData"
-            }
         }
     },
     "variables": {
@@ -327,9 +320,6 @@
                     "properties": {
                         "configuration": {
                             "name": "[parameters('configurationName')]"
-                        },
-                        "parameters": {
-                            "ConfigurationData": "[parameters('jobConfigurationData')]"
                         }
                     }
                 }

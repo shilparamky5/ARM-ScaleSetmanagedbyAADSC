@@ -11,15 +11,15 @@ Configuration webServer
 		}
 		xFirewall HTTP
 		{
-            Name = 'HTTP'
-            Group = 'HTTP'
-            Ensure = 'Present'
-            Action = 'Allow'
-            Enabled = 'True'
-            Profile = 'Public'
-            Direction = 'Inbound'
-            Protocol = 'TCP'
-            LocalPort = 80
-        }
+			Name = 'HTTP'
+			Group = 'HTTP'
+			Ensure = 'Present'
+			Action = 'Allow'
+			Enabled = 'True'
+			Profile = 'Public'
+			Direction = 'Inbound'
+			Protocol = 'TCP'
+			LocalPort = 80
+		}
 	}
 }
