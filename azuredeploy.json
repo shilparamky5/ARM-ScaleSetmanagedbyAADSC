@@ -318,7 +318,7 @@
                         "name": "[variables('bePoolName')]"
                     }
                 ],
-                "inboundNatPools": [
+                "inboundNatRules": [
                     {
                         "name": "[variables('natPoolName')]",
                         "properties": {
