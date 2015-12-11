@@ -27,7 +27,7 @@ This commands assumes you want to either create a new Resource Group named "Test
 	
 	$RegistrationInfo = Get-AzureRmAutomationRegistrationInfo -ResourceGroupName $ResourceGroupName -AutomationAccountName $AccountName
 	
-	New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateFile .\azuredeploy.json -TemplateParameterFile .\azuredeploy.parameters.json -registrationKey $RegistrationInfo.PrimaryKey -registrationUrl $RegistrationInfo.Endpoint -automationAccountName $AccountName -jobId (New-GUID) -Verbose
+	New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateFile .\azuredeploy.json -TemplateParameterFile .\azuredeploy.parameters.json -registrationKey ($RegistrationInfo.PrimaryKey | ConvertTo-SecureString -AsPlainText -Force) -registrationUrl($RegistrationInfo.Endpoint | ConvertTo-SecureString -AsPlainText -Force) -automationAccountName $AccountName -jobId (New-GUID) -Verbose
 	
 ## To remove registered nodes from Azure Automation DSC if you are not ready to delete the account
 Replace with values for your account.  The resource group in this case refers to the Azure Automation instance.
