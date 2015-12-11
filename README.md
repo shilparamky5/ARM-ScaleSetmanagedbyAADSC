@@ -16,10 +16,13 @@ This repo serves to prove an ARM template to deploy a VM Scale Set where virtual
 This commands assumes you want to either create a new Resource Group named "TestScaleSet0001", or deploy in to an existing Resource Group by that name.
     
 	Login-AzureRmAccount
-	New-AzureRmResourcegroup -Name TestScaleSets0001 -Location 'East US' -Verbose
-	New-AzureRmResourceGroupDeployment -Name TestScaleSets0001 -ResourceGroupName TestScaleSets0001 -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json -instanceCount 10 -Verbose
+	$ResourceGroupName = 'TestScaleSets0001'
+	$AccountName = 'myAutomationAccount'
+	New-AzureRmResourcegroup -Name $ResourceGroupName -Location 'East US' -Verbose
+	New-AzureRMAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AccountName -Location 'East US 2' -Plan Free -Verbose
+	New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json -jobID (New-GUID) -Verbose
 	
-## To remove registered nodes after testing is complete
+## To remove registered nodes from Azure Automation DSC if you are not ready to delete the account
 Replace with values for your account.  The resource group in this case refers to the Azure Automation instance.
 
 	Login-AzureRmAccount
@@ -28,4 +31,5 @@ Replace with values for your account.  The resource group in this case refers to
 ## Prior Examples
 
 [VM DSC Extension Azure Automation Pull Server](https://github.com/Azure/azure-quickstart-templates/tree/master/dsc-extension-azure-automation-pullserver)<br>
-[Deployment of Multiple VM Scale Sets of Windows VMs](https://github.com/Azure/azure-quickstart-templates/tree/02d32850258f5b172266896e498e30e8e526080a/301-multi-vmss-windows)
+[Deployment of Multiple VM Scale Sets of Windows VMs](https://github.com/Azure/azure-quickstart-templates/tree/02d32850258f5b172266896e498e30e8e526080a/301-multi-vmss-windows)<br>
+[Copy a DSC Configuration to Azure Automation and compile](https://github.com/azureautomation/automation-packs/tree/master/201-Deploy-And-Compile-DSC-Configuration-Credentials)

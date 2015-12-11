@@ -147,6 +147,7 @@
         },
         "automationAccountName": {
             "type": "string",
+            "defaultValue": "myAutomationAccount",
             "metadata": {
                 "description": "The name of the Automation account to use.  If this account exists, check the SKU and tags to make sure they match the exisitng account."
             }
@@ -225,9 +226,8 @@
         "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
         "natPoolName": "[concat(variables('namingInfix'), 'natpool')]",
         "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
-        "natStartPort": 5000,
-        "natEndPort": 5099,
-        "natBackendPort": 5986,
+        "natFrontendPort": 80,
+        "natBackendPort": 80,
         "nicName": "[concat(variables('namingInfix'), 'nic')]",
         "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
         "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
@@ -241,7 +241,7 @@
         "automationPricingTier": "Free",
         "dscOverwrite": "true",
         "dscModules": {
-            "xNetwork": {
+            "xNetworking": {
                 "moduleName": "xNetworking",
                 "moduleUri": "https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC/raw/master/xNetworking.zip"
             }
@@ -326,8 +326,7 @@
                                 "id": "[variables('frontEndIPConfigID')]"
                             },
                             "protocol": "tcp",
-                            "frontendPortRangeStart": "[variables('natStartPort')]",
-                            "frontendPortRangeEnd": "[variables('natEndPort')]",
+                            "frontendPort": "[variables('natFrontendPort')]",
                             "backendPort": "[variables('natBackendPort')]"
                         }
                     }
@@ -491,7 +490,7 @@
         {
             "type": "Microsoft.Automation/automationAccounts",
             "name": "[parameters('automationAccountName')]",
-            "apiVersion": "2015-01-01-preview",
+            "apiVersion": "[variables('apiVersion')]",
             "location": "[parameters('automationRegionId')]",
             "dependsOn": [ ],
             "tags": { },
@@ -502,13 +501,27 @@
             },
             "resources": [             
                 {
-                    "name": "[parameters('configurationName')]",
-                    "type": "Configurations",
-                    "apiVersion": "2015-01-01-preview",
-                    "location": "[parameters('regionId')]",
+                    "name": "[concat(parameters('automationAccountName'), '/', variables('dscModules').xNetworking.ModuleName)]",
+                    "type": "microsoft.automation/automationAccounts/Modules",
+                    "apiVersion": "[variables('apiVersion')]",
                     "tags": { },
                     "dependsOn": [
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]"
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
+                    ],
+                    "properties": {
+                        "contentLink": {
+                        "uri": "[variables('dscModules').xNetworking.ModuleUri]"
+                        }
+                    }
+                },
+                {
+                    "name": "[parameters('configurationName')]",
+                    "type": "Configurations",
+                    "apiVersion": "[variables('apiVersion')]",
+                    "location": "[parameters('automationRegionId')]",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
                     ],
                     "properties": {
                         "logVerbose": "false",
@@ -524,16 +537,13 @@
                 {
                     "name": "[parameters('jobId')]",
                     "type": "Compilationjobs",
-                    "apiVersion": "2015-01-01-preview",
-                    "location": "parameters('regionId')]",
+                    "apiVersion": "[variables('apiVersion')]",
+                    "location": "parameters('automationRegionId')]",
                     "tags": { },
                     "dependsOn": [
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Credentials/',parameters('credentialName'))]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Variables/',parameters('variableName'))]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Modules/',variables('dscModules').xComputerManagement.ModuleName)]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Modules/',variables('dscModules').xActiveDirectory.ModuleName)]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Configurations/', parameters('configurationName'))]"
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Modules/',variables('dscModules').xNetworking.ModuleName)]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Configurations/', parameters('configurationName'))]"
                     ],
                     "properties": {
                         "configuration": {
@@ -541,20 +551,6 @@
                         },
                         "parameters": {
                         "ConfigurationData": "[parameters('jobConfigurationData')]"
-                        }
-                    }
-                },
-                {
-                    "name": "[concat(parameters('accountName'), '/', variables('dscModules').xNetworking.ModuleName)]",
-                    "type": "microsoft.automation/automationAccounts/Modules",
-                    "apiVersion": "2015-01-01-preview",
-                    "tags": { },
-                    "dependsOn": [
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]"
-                    ],
-                    "properties": {
-                        "contentLink": {
-                        "uri": "[variables('dscModules').xNetworking.ModuleUri]"
                         }
                     }
                 }
