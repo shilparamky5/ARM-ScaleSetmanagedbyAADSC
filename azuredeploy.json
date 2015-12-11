@@ -250,6 +250,75 @@
     },
     "resources": [
         {
+            "type": "Microsoft.Automation/automationAccounts",
+            "name": "[parameters('automationAccountName')]",
+            "apiVersion": "[variables('automationApiVersion')]",
+            "location": "[parameters('automationRegionId')]",
+            "dependsOn": [ ],
+            "tags": { },
+            "properties": {
+                "sku": {
+                "name": "[variables('automationPricingTier')]"
+                }
+            },
+            "resources": [             
+                {
+                    "name": "[concat(parameters('automationAccountName'), '/', variables('dscModules').xNetworking.ModuleName)]",
+                    "type": "microsoft.automation/automationAccounts/Modules",
+                    "apiVersion": "[variables('automationApiVersion')]",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
+                    ],
+                    "properties": {
+                        "contentLink": {
+                        "uri": "[variables('dscModules').xNetworking.ModuleUri]"
+                        }
+                    }
+                },
+                {
+                    "name": "[parameters('configurationName')]",
+                    "type": "Configurations",
+                    "apiVersion": "[variables('automationApiVersion')]",
+                    "location": "[parameters('automationRegionId')]",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
+                    ],
+                    "properties": {
+                        "logVerbose": "false",
+                        "description": "[parameters('configurationDescription')]",
+                        "state": "Published",
+                        "overwrite": "[variables('dscOverwrite')]",
+                        "Source": {
+                        "type": "uri",
+                        "Value": "[parameters('configurationURI')]"
+                        }
+                    }
+                },
+                {
+                    "name": "[parameters('jobId')]",
+                    "type": "Compilationjobs",
+                    "apiVersion": "[variables('automationApiVersion')]",
+                    "location": "parameters('automationRegionId')]",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Modules/',variables('dscModules').xNetworking.ModuleName)]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Configurations/', parameters('configurationName'))]"
+                    ],
+                    "properties": {
+                        "configuration": {
+                        "name": "[parameters('configurationName')]"
+                        },
+                        "parameters": {
+                        "ConfigurationData": "[parameters('jobConfigurationData')]"
+                        }
+                    }
+                }
+            ]
+            },
+            {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[concat(variables('uniqueStringArray')[copyIndex()], variables('newStorageAccountSuffix'))]",
             "location": "[parameters('resourceLocation')]",
@@ -340,6 +409,9 @@
             "location": "[parameters('resourceLocation')]",
             "apiVersion": "[variables('apiVersion')]",
             "dependsOn": [
+                "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]",
+                "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Modules/',variables('dscModules').xNetworking.ModuleName)]",
+                "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Configurations/', parameters('configurationName'))]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[0], variables('newStorageAccountSuffix'))]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[1], variables('newStorageAccountSuffix'))]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('uniqueStringArray')[2], variables('newStorageAccountSuffix'))]",
@@ -487,77 +559,17 @@
                     }
                 }
             }
-        },
-        {
-            "type": "Microsoft.Automation/automationAccounts",
-            "name": "[parameters('automationAccountName')]",
-            "apiVersion": "[variables('automationApiVersion')]",
-            "location": "[parameters('automationRegionId')]",
-            "dependsOn": [ ],
-            "tags": { },
-            "properties": {
-                "sku": {
-                "name": "[variables('automationPricingTier')]"
-                }
-            },
-            "resources": [             
-                {
-                    "name": "[concat(parameters('automationAccountName'), '/', variables('dscModules').xNetworking.ModuleName)]",
-                    "type": "microsoft.automation/automationAccounts/Modules",
-                    "apiVersion": "[variables('automationApiVersion')]",
-                    "tags": { },
-                    "dependsOn": [
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
-                    ],
-                    "properties": {
-                        "contentLink": {
-                        "uri": "[variables('dscModules').xNetworking.ModuleUri]"
-                        }
-                    }
-                },
-                {
-                    "name": "[parameters('configurationName')]",
-                    "type": "Configurations",
-                    "apiVersion": "[variables('automationApiVersion')]",
-                    "location": "[parameters('automationRegionId')]",
-                    "tags": { },
-                    "dependsOn": [
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
-                    ],
-                    "properties": {
-                        "logVerbose": "false",
-                        "description": "[parameters('configurationDescription')]",
-                        "state": "Published",
-                        "overwrite": "[variables('dscOverwrite')]",
-                        "Source": {
-                        "type": "uri",
-                        "Value": "[parameters('configurationURI')]"
-                        }
-                    }
-                },
-                {
-                    "name": "[parameters('jobId')]",
-                    "type": "Compilationjobs",
-                    "apiVersion": "[variables('automationApiVersion')]",
-                    "location": "parameters('automationRegionId')]",
-                    "tags": { },
-                    "dependsOn": [
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Modules/',variables('dscModules').xNetworking.ModuleName)]",
-                        "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Configurations/', parameters('configurationName'))]"
-                    ],
-                    "properties": {
-                        "configuration": {
-                        "name": "[parameters('configurationName')]"
-                        },
-                        "parameters": {
-                        "ConfigurationData": "[parameters('jobConfigurationData')]"
-                        }
-                    }
-                }
-            ]
-            }
+        }
     ],
   "outputs": {
+      "publicIpId": {
+      "value": "[variables('publicIpId')]",
+      "type": "string"
+    },
+    "fqdn": {
+      "value": "[reference(variables('publicIpId'),providers('Microsoft.Network', 'publicIPAddresses').apiVersions[0]).dnsSettings.fqdn]",
+      "type": "string"
+    }
+
   }
 }
