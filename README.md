@@ -8,7 +8,7 @@
 
 This repo serves to prove an ARM template to deploy a VM Scale Set where virtual machines are deployed as registered nodes in the Azure Automation Desired State Configuration service, and node configuration is guaranteed consistency after deployment.
 
-## From Git Shell
+## To clone the module to your local machine from Git Shell
     
 	git clone https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC
     
