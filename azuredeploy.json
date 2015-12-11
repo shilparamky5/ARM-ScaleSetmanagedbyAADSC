@@ -203,6 +203,7 @@
     },
     "variables": {
         "apiVersion": "2015-06-15",
+        "automationApiVersion": "2015-10-31",
         "storageAccountType": "Standard_LRS",
         "saCount": 5,
         "namingInfix": "[toLower(parameters('vmssName'))]",
@@ -490,7 +491,7 @@
         {
             "type": "Microsoft.Automation/automationAccounts",
             "name": "[parameters('automationAccountName')]",
-            "apiVersion": "[variables('apiVersion')]",
+            "apiVersion": "[variables('automationApiVersion')]",
             "location": "[parameters('automationRegionId')]",
             "dependsOn": [ ],
             "tags": { },
@@ -503,7 +504,7 @@
                 {
                     "name": "[concat(parameters('automationAccountName'), '/', variables('dscModules').xNetworking.ModuleName)]",
                     "type": "microsoft.automation/automationAccounts/Modules",
-                    "apiVersion": "[variables('apiVersion')]",
+                    "apiVersion": "[variables('automationApiVersion')]",
                     "tags": { },
                     "dependsOn": [
                         "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'))]"
@@ -517,7 +518,7 @@
                 {
                     "name": "[parameters('configurationName')]",
                     "type": "Configurations",
-                    "apiVersion": "[variables('apiVersion')]",
+                    "apiVersion": "[variables('automationApiVersion')]",
                     "location": "[parameters('automationRegionId')]",
                     "tags": { },
                     "dependsOn": [
@@ -537,7 +538,7 @@
                 {
                     "name": "[parameters('jobId')]",
                     "type": "Compilationjobs",
-                    "apiVersion": "[variables('apiVersion')]",
+                    "apiVersion": "[variables('automationApiVersion')]",
                     "location": "parameters('automationRegionId')]",
                     "tags": { },
                     "dependsOn": [
