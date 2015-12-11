@@ -174,7 +174,7 @@
         },
         "configurationURI": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/migreene/",
+            "defaultValue": "https://raw.githubusercontent.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC/master/webServer.ps1",
             "metadata": {
                 "description": "The URI for the DSC configuration "
             }
@@ -243,7 +243,7 @@
         "dscModules": {
             "xNetwork": {
                 "moduleName": "xNetworking",
-                "moduleUri": "https://raw.githubusercontent.com/migreene"
+                "moduleUri": "https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC/raw/master/xNetworking.zip"
             }
         }
     },
