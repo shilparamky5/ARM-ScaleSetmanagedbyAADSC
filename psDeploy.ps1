@@ -5,8 +5,8 @@ param (
 	[Parameter(Mandatory=$true)]
 	[pscredential]$Credential 
 )  
-$ResourceGroupName = 'vmss19'
-$AccountName = 'AutomationAccount19'
+$ResourceGroupName = 'vmss20'
+$AccountName = 'AutomationAccount20'
 New-AzureRmResourcegroup -Name $ResourceGroupName -Location 'East US' -Verbose
 New-AzureRMAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AccountName -Location 'East US 2' -Plan Free -Verbose
 $RegistrationInfo = Get-AzureRmAutomationRegistrationInfo -ResourceGroupName $ResourceGroupName -AutomationAccountName $AccountName
