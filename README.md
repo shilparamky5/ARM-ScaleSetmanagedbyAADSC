@@ -16,16 +16,24 @@ This repo serves to prove an ARM template to deploy a VM Scale Set where virtual
 This commands assumes you want to either create a new Resource Group named "TestScaleSet0001", or deploy in to an existing Resource Group by that name.
     
 	Login-AzureRmAccount
+	
 	$ResourceGroupName = 'TestScaleSets0001'
+	
 	$AccountName = 'myAutomationAccount'
+	
 	New-AzureRmResourcegroup -Name $ResourceGroupName -Location 'East US' -Verbose
+	
 	New-AzureRMAutomationAccount -ResourceGroupName $ResourceGroupName -Name $AccountName -Location 'East US 2' -Plan Free -Verbose
-	New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateParameterFile .\azuredeploy.parameters.json -TemplateFile .\azuredeploy.json -jobID (New-GUID) -Verbose
+	
+	$RegistrationInfo = Get-AzureRmAutomationRegistrationInfo -ResourceGroupName $ResourceGroupName -AutomationAccountName $AccountName
+	
+	New-AzureRmResourceGroupDeployment -Name TestDeployment -ResourceGroupName $ResourceGroupName -TemplateFile .\azuredeploy.json -TemplateParameterFile .\azuredeploy.parameters.json -registrationKey $RegistrationInfo.PrimaryKey -registrationUrl $RegistrationInfo.Endpoint -automationAccountName $AccountName -jobId (New-GUID) -Verbose
 	
 ## To remove registered nodes from Azure Automation DSC if you are not ready to delete the account
 Replace with values for your account.  The resource group in this case refers to the Azure Automation instance.
 
 	Login-AzureRmAccount
+	
 	Get-AzureRMAutomationDSCNode -ResourceGroupName 'YOUR_RG_HERE' -AutomationAccountName 'YOUR_ACCOUNT_NAME_HERE' | ? Name -like YOUR_NAME_PATTERN_HERE-* | Unregister-AzureRmAutomationDscNode -Force
 
 ## Prior Examples

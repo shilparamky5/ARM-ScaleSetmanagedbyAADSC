@@ -5,15 +5,6 @@
         "instanceCount": {
             "value": 10
         },
-        "registrationKey": {
-            "value": ""
-        },
-        "registrationUrl": {
-            "value": ""
-        },
-        "nodeConfigurationName": {
-            "value": ""
-        },
         "timestamp": {
             "value": "MM/dd/yyyy H:mm:ss tt"
         }
