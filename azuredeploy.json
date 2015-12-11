@@ -144,6 +144,60 @@
             "metadata": {
                 "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
             }
+        },
+        "automationAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Automation account to use.  If this account exists, check the SKU and tags to make sure they match the exisitng account."
+            }
+        },
+        "automationRegionId": {
+            "type": "string",
+            "defaultValue": "East US 2",
+            "allowedValues": [
+                "Japan East",
+                "East US 2",
+                "West Europe",
+                "Southeast Asia",
+                "South Central US"
+            ],
+            "metadata": {
+                "description": "The region the Automation account is located in."
+            }
+        },
+        "configurationName": {
+            "type": "string",
+            "defaultValue": "webServer",
+            "metadata": {
+                "description": "The name of the DSC Configuration. The name must match the name in the URI."
+            }
+        },
+        "configurationURI": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/migreene/",
+            "metadata": {
+                "description": "The URI for the DSC configuration "
+            }
+        },
+        "configurationDescription": {
+            "type": "string",
+            "defaultValue": "Web Server",
+            "metadata": {
+                "description": "The description of the configuration."
+            }
+        },
+        "jobId": {
+            "type": "string",
+            "metadata": {
+                "description": "the job id to compile the configuration"
+            }
+        },
+        "jobConfigurationData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Escaped Json of DSC ConfigurationData"
+            }
         }
     },
     "variables": {
@@ -183,7 +237,15 @@
             "sku": "[parameters('windowsOSVersion')]",
             "version": "latest"
         },
-        "imageReference": "[variables('osType')]"
+        "imageReference": "[variables('osType')]",
+        "automationPricingTier": "Free",
+        "dscOverwrite": "true",
+        "dscModules": {
+            "xNetwork": {
+                "moduleName": "xNetworking",
+                "moduleUri": "https://raw.githubusercontent.com/migreene"
+            }
+        }
     },
     "resources": [
         {
@@ -425,6 +487,80 @@
                     }
                 }
             }
-        }
-    ]
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts",
+            "name": "[parameters('automationAccountName')]",
+            "apiVersion": "2015-01-01-preview",
+            "location": "[parameters('automationRegionId')]",
+            "dependsOn": [ ],
+            "tags": { },
+            "properties": {
+                "sku": {
+                "name": "[variables('automationPricingTier')]"
+                }
+            },
+            "resources": [             
+                {
+                    "name": "[parameters('configurationName')]",
+                    "type": "Configurations",
+                    "apiVersion": "2015-01-01-preview",
+                    "location": "[parameters('regionId')]",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]"
+                    ],
+                    "properties": {
+                        "logVerbose": "false",
+                        "description": "[parameters('configurationDescription')]",
+                        "state": "Published",
+                        "overwrite": "[variables('dscOverwrite')]",
+                        "Source": {
+                        "type": "uri",
+                        "Value": "[parameters('configurationURI')]"
+                        }
+                    }
+                },
+                {
+                    "name": "[parameters('jobId')]",
+                    "type": "Compilationjobs",
+                    "apiVersion": "2015-01-01-preview",
+                    "location": "parameters('regionId')]",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Credentials/',parameters('credentialName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Variables/',parameters('variableName'))]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Modules/',variables('dscModules').xComputerManagement.ModuleName)]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Modules/',variables('dscModules').xActiveDirectory.ModuleName)]",
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'),'/Configurations/', parameters('configurationName'))]"
+                    ],
+                    "properties": {
+                        "configuration": {
+                        "name": "[parameters('configurationName')]"
+                        },
+                        "parameters": {
+                        "ConfigurationData": "[parameters('jobConfigurationData')]"
+                        }
+                    }
+                },
+                {
+                    "name": "[concat(parameters('accountName'), '/', variables('dscModules').xNetworking.ModuleName)]",
+                    "type": "microsoft.automation/automationAccounts/Modules",
+                    "apiVersion": "2015-01-01-preview",
+                    "tags": { },
+                    "dependsOn": [
+                        "[concat('Microsoft.Automation/automationAccounts/', parameters('accountName'))]"
+                    ],
+                    "properties": {
+                        "contentLink": {
+                        "uri": "[variables('dscModules').xNetworking.ModuleUri]"
+                        }
+                    }
+                }
+            ]
+            }
+    ],
+  "outputs": {
+  }
 }
