@@ -667,11 +667,11 @@
     ],
     "outputs": {
         "publicIp": {
-        "value": "[resourceId(concat('Microsoft.Network','/','publicIPAddresses'),parameters('publicIPAddressName'))]",
+        "value": "[resourceId(concat('Microsoft.Network','/','publicIPAddresses'),variables('publicIPAddressName'))]",
         "type": "string"
         },
         "fqdn": {
-        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIpAddressName')),providers('Microsoft.Network', 'publicIPAddresses').apiVersions[0]).dnsSettings.fqdn]",
+        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName')),providers('Microsoft.Network', 'publicIPAddresses').apiVersions[0]).dnsSettings.fqdn]",
         "type": "string"
         }
   }

@@ -8,6 +8,25 @@
 
 This repo serves to prove an ARM template to deploy a VM Scale Set where virtual machines are deployed as registered nodes in the Azure Automation Desired State Configuration service, and node configuration is guaranteed consistency after deployment, and the AADSC service components are provided in the same deployment template.
 
+The Azure Resource Manager template includes:
+- Deploy virtual machines in Scale Set with autoscale rules defined
+- Distribute VHD files across 5 storage accounts
+- Configure Azure Automation DSC service with configuration and modules to manage the virtual machines
+- Boostrap the virtual machines as registered nodes of the service using DSC extension
+- Load balance traffic to web servers across the VM Scale Set
+- NAT remote management ports across VM Scale Set
+
+Tested scenarios:
+- End to end deployment
+- Modify configuration of live VM Scale Set by updating Configuration in AADSC
+- Add and remove nodes from the VM Scale set and maintain consistency
+- Deployed VM's return to configuration after a forced drift out of compliance
+
+Future work:
+- Test autoscale
+- Add OMS monitoring
+- Add Operational Validation
+
 ## To clone the module to your local machine from Git Shell
     
 	git clone https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC
