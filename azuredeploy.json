@@ -666,13 +666,13 @@
         }
     ],
     "outputs": {
-        "publicIpId": {
-            "value": "[variables('publicIPAddressName')]",
-            "type": "string"
+        "publicIp": {
+        "value": "[resourceId(concat('Microsoft.Network','/','publicIPAddresses'),parameters('publicIPAddressName'))]",
+        "type": "string"
         },
         "fqdn": {
-            "value": "[reference(variables('publicIPAddressID'),providers('Microsoft.Network', 'publicIPAddresses').apiVersions[0]).dnsSettings.fqdn]",
-            "type": "string"
+        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIpAddressName')),providers('Microsoft.Network', 'publicIPAddresses').apiVersions[0]).dnsSettings.fqdn]",
+        "type": "string"
         }
-    }
+  }
 }
