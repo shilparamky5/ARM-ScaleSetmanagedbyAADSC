@@ -667,7 +667,7 @@
     ],
     "outputs": {
         "publicIpId": {
-            "value": "[variables('publicIPAddressID')]",
+            "value": "[variables('publicIPAddressName')]",
             "type": "string"
         },
         "fqdn": {
