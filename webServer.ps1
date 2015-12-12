@@ -11,8 +11,8 @@ Configuration webServer
 		}
 		xFirewall HTTP
 		{
-			Name = 'IIS-WebServerRole-HTTP-In-TCP'
-			Group = 'World Wide Web Services (HTTP)'
+			Name = 'WebServer-HTTP-In-TCP'
+			Group = 'Web Server'
 			Ensure = 'Present'
 			Action = 'Allow'
 			Enabled = 'True'
@@ -20,6 +20,7 @@ Configuration webServer
 			Direction = 'Inbound'
 			Protocol = 'TCP'
 			LocalPort = 80
+			DependsOn = '[WindowsFeature]webServer'
 		}
 	}
 }
