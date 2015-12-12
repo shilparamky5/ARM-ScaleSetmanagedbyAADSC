@@ -252,7 +252,7 @@
         "dscModules": {
             "xNetworking": {
                 "moduleName": "xNetworking",
-                "moduleUri": "https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC/raw/master/xNetworking.zip"
+                "moduleUri": "https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC/raw/master/xNetworking_2.5.0.0.zip"
             }
         },
         "autoScaleWAD": "[concat(variables('namingInfix'), 'autoScale')]",
