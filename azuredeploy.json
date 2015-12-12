@@ -667,7 +667,7 @@
     ],
     "outputs": {
         "publicIp": {
-        "value": "[resourceId(concat('Microsoft.Network','/','publicIPAddresses'),variables('publicIPAddressName'))]",
+        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName')),providers('Microsoft.Network', 'publicIPAddresses',parameters('vmssName')).apiVersions[0]).ipAddress]",
         "type": "string"
         },
         "fqdn": {

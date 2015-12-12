@@ -11,6 +11,9 @@
         "instanceCount": {
             "value": 2
         },
+        "windowsOSVersion": {
+            "value": "2016-Technical-Preview-with-Containers" 
+        },
         "timestamp": {
             "value": "MM/dd/yyyy H:mm:ss tt"
         }
