@@ -9,7 +9,7 @@
             "value": "srv"
         },
         "instanceCount": {
-            "value": 5
+            "value": 2
         },
         "timestamp": {
             "value": "MM/dd/yyyy H:mm:ss tt"

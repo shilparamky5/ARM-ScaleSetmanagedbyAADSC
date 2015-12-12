@@ -2,7 +2,7 @@ Configuration webServer
 {
 	Import-DSCResource -ModuleName PSDesiredStateConfiguration, xNetworking
 	
-	Node $AllNodes.NodeName
+	Node localhost
 	{
 		WindowsFeature webServer
 		{
