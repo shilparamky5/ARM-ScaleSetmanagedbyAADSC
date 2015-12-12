@@ -19,6 +19,7 @@ The Azure Resource Manager template includes:
 Tested scenarios:
 - End to end deployment
 - Modify configuration of live VM Scale Set by updating Configuration in AADSC
+- Report on VM configuration consistency from AADSC
 - Add and remove nodes from the VM Scale set and maintain consistency
 - Deployed VM's return to configuration after a forced drift out of compliance
 
