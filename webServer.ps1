@@ -11,12 +11,12 @@ Configuration webServer
 		}
 		xFirewall HTTP
 		{
-			Name = 'HTTP'
-			Group = 'HTTP'
+			Name = 'IIS-WebServerRole-HTTP-In-TCP'
+			Group = 'World Wide Web Services (HTTP)'
 			Ensure = 'Present'
 			Action = 'Allow'
 			Enabled = 'True'
-			Profile = 'Public'
+			Profile = 'Any'
 			Direction = 'Inbound'
 			Protocol = 'TCP'
 			LocalPort = 80
