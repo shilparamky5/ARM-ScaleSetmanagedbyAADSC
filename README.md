@@ -27,6 +27,7 @@ Future work:
 - Test autoscale
 - Add OMS monitoring
 - Add Operational Validation
+- Deliver web app using Containers managed by [DSC](https://github.com/bgelens/cWindowsContainer)
 
 ## To clone the module to your local machine from Git Shell
     
