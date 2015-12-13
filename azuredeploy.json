@@ -237,7 +237,12 @@
         "natRDPPoolID": "[concat(variables('loadBalancerID'),'/inboundNatPools/',variables('natRDPPoolName'))]",
         "natRDPStartPort":50000,
         "natRDPEndPort":50099,
-        "natRDPBackendPort":5896,
+        "natRDPBackendPort":3389,
+        "natWinRMPoolName": "[concat(variables('loadBalancerName'), 'natWinRM')]",
+        "natWinRMPoolID": "[concat(variables('loadBalancerID'),'/inboundNatPools/',variables('natWinRMPoolName'))]",
+        "natWinRMStartPort":51000,
+        "natWinRMEndPort":51099,
+        "natWinRMBackendPort":5896,
         "nicName": "[concat(variables('namingInfix'), 'nic')]",
         "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
         "osType": {
@@ -257,7 +262,7 @@
         },
         "autoScaleWAD": "[concat(variables('namingInfix'), 'autoScale')]",
         "autoscaleProcProfile": "[concat(variables('namingInfix'), 'autoScaleProcProfile')]",
-        "diagnosticsStorageAccountName": "[concat(variables('namingInfix'), 'diagsa')]",
+        "diagnosticsStorageAccountName": "[concat(variables('uniqueStringArray')[0], 'diagsa')]",
 		"diagnosticsStorageAccountResourceGroup": "[resourceGroup().name]",
 		"accountid": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',variables('diagnosticsStorageAccountResourceGroup'),'/providers/','Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]",
 		"wadlogs": "<WadCfg> <DiagnosticMonitorConfiguration overallQuotaInMB=\"4096\" xmlns=\"http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration\"> <DiagnosticInfrastructureLogs scheduledTransferLogLevelFilter=\"Error\"/> <WindowsEventLog scheduledTransferPeriod=\"PT1M\" > <DataSource name=\"Application!*[System[(Level = 1 or Level = 2)]]\" /> <DataSource name=\"Security!*[System[(Level = 1 or Level = 2)]]\" /> <DataSource name=\"System!*[System[(Level = 1 or Level = 2)]]\" /></WindowsEventLog>",
@@ -456,6 +461,18 @@
                             "frontendPortRangeStart": "[variables('natRDPStartPort')]",
                             "frontendPortRangeEnd": "[variables('natRDPEndPort')]",
                             "backendPort": "[variables('natRDPBackendPort')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('natWinRMPoolName')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontEndIPConfigurationsID')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": "[variables('natWinRMStartPort')]",
+                            "frontendPortRangeEnd": "[variables('natWinRMEndPort')]",
+                            "backendPort": "[variables('natWinRMBackendPort')]"
                         }
                     }
                 ]
