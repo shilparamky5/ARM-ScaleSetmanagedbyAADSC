@@ -237,7 +237,7 @@
         "natRDPPoolID": "[concat(variables('loadBalancerID'),'/inboundNatPools/',variables('natRDPPoolName'))]",
         "natRDPStartPort":50000,
         "natRDPEndPort":50099,
-        "natRDPBackendPort":3389,
+        "natRDPBackendPort":5896,
         "nicName": "[concat(variables('namingInfix'), 'nic')]",
         "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
         "osType": {
