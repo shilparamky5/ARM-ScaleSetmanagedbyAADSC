@@ -641,7 +641,8 @@
                                                 ],
                                                 "loadBalancerInboundNatPools": [
                                                     {
-                                                        "id": "[variables('natRDPPoolID')]"
+                                                        "id": "[variables('natRDPPoolID')]",
+                                                        "id": "[variables('natWinRMPoolID')]"
                                                     }
                                                 ]
                                             }
