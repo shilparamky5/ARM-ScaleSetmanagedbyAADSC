@@ -530,7 +530,6 @@
                                 "properties": {
                                     "publisher": "Microsoft.Powershell",
                                     "type": "DSC",
-                                    "typeHandlerVersion": "2.6",
                                     "protectedSettings": {
                                         "Items": {
                                             "registrationKeyPrivate": "[parameters('registrationKey')]"
@@ -603,7 +602,6 @@
 								"properties": {
 									"publisher": "Microsoft.Azure.Diagnostics",
 									"type": "IaaSDiagnostics",
-									"typeHandlerVersion": "1.5",
 									"autoUpgradeMinorVersion": true,
 									"settings": {
 										"xmlCfg": "[base64(concat(variables('wadcfgxstart'),variables('wadmetricsresourceid'),variables('wadcfgxend')))]",
