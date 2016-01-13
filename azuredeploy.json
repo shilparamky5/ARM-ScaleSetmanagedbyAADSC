@@ -233,6 +233,7 @@
         "backendAddressPoolID": "[concat(variables('loadBalancerID'),'/backendAddressPools/',variables('backendAddressPoolsName'))]",
         "httpProbeName": "[concat(variables('loadBalancerName'),'httpProbe')]",
         "httpProbeID": "[concat(variables('loadBalancerID'),'/probes/',variables('httpProbeName'))]",
+        "httpProbeRequestPath": "/iisstart.htm",
         "natRDPPoolName": "[concat(variables('loadBalancerName'), 'natRDP')]",
         "natRDPPoolID": "[concat(variables('loadBalancerID'),'/inboundNatPools/',variables('natRDPPoolName'))]",
         "natRDPStartPort":50000,
@@ -257,7 +258,11 @@
         "dscModules": {
             "xNetworking": {
                 "moduleName": "xNetworking",
-                "moduleUri": "https://github.com/mgreenegit/ARM-ScaleSetmanagedbyAADSC/raw/master/xNetworking_2.5.0.0.zip"
+                "moduleUri": "https://devopsgallerystorage.blob.core.windows.net/azureautomationpackages/xNetworking%5C2.5.0%5CxNetworking.zip"
+            },
+            "cMMAAgent": {
+                "moduleName": "cMMAAgent",
+                "moduleUri": "https://devopsgallerystorage.blob.core.windows.net/azureautomationpackages/cMMAgent%5C1.2.0%5CcMMAgent.zip"
             }
         },
         "autoScaleWAD": "[concat(variables('namingInfix'), 'autoScale')]",
@@ -443,10 +448,11 @@
                     {
                         "name": "[variables('httpProbeName')]",
                         "properties": {
-                            "protocol": "tcp",
+                            "protocol": "http",
                             "port": 80,
                             "intervalInSeconds": 5,
-                            "numberOfProbes": 2
+                            "numberOfProbes": 2,
+                            "requestPath": "[variables('httpProbeRequestPath')]"
                         }
                     }
                 ],
@@ -641,7 +647,9 @@
                                                 ],
                                                 "loadBalancerInboundNatPools": [
                                                     {
-                                                        "id": "[variables('natRDPPoolID')]",
+                                                        "id": "[variables('natRDPPoolID')]"
+                                                    },
+                                                    {
                                                         "id": "[variables('natWinRMPoolID')]"
                                                     }
                                                 ]
