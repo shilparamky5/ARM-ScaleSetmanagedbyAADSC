@@ -259,10 +259,6 @@
             "xNetworking": {
                 "moduleName": "xNetworking",
                 "moduleUri": "https://devopsgallerystorage.blob.core.windows.net/azureautomationpackages/xNetworking%5C2.5.0%5CxNetworking.zip"
-            },
-            "cMMAAgent": {
-                "moduleName": "cMMAAgent",
-                "moduleUri": "https://devopsgallerystorage.blob.core.windows.net/azureautomationpackages/cMMAgent%5C1.2.0%5CcMMAgent.zip"
             }
         },
         "autoScaleWAD": "[concat(variables('namingInfix'), 'autoScale')]",

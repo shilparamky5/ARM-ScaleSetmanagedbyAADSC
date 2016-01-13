@@ -43,8 +43,11 @@ Describe "Template: $template" -Tags Unit {
                                  'Microsoft.Network/virtualNetworks',
                                  'Microsoft.Network/publicIPAddresses',
                                  'Microsoft.Network/loadBalancers',
-                                 'Microsoft.Compute/virtualMachineScaleSets'
+                                 'Microsoft.Compute/virtualMachineScaleSets',
+                                 'Microsoft.Automation/automationAccounts',
+                                 'Microsoft.Insights/autoscaleSettings'
             $templateResources = (get-content "$here\azuredeploy.json" | ConvertFrom-Json -ErrorAction SilentlyContinue).Resources
+            $templateResources | Should Be $expectedResources
         }
         
         It "Contains the expected DSC extension properties" {
@@ -59,6 +62,7 @@ Describe "Template: $template" -Tags Unit {
                                               'AllowModuleOverwrite',
                                               'Timestamp'
             $dscExtensionProperties = (get-content "$here\azuredeploy.json" | ConvertFrom-Json -ErrorAction SilentlyContinue).Resources | ? type -eq Microsoft.Compute/virtualMachineScaleSets | % properties | % virtualMachineProfile | % extensionProfile | % extensions | % properties | % settings | % Properties | % Name
+            $dscExtensionProperties | Should Be $expectedDscExtensionProperties
         }
     }
 }

@@ -1,12 +1,6 @@
 Configuration webServer
 {
-param(
-	[Parameter(Mandatory=$true)]
-	[string]$WorkspaceID,
-	[Parameter(Mandatory=$true)]
-	[string]$WorkspaceKey
-)
-	Import-DSCResource -ModuleName PSDesiredStateConfiguration, xNetworking, cMMAgent
+    Import-DSCResource -ModuleName PSDesiredStateConfiguration, xNetworking
 	
 	Node localhost
 	{
@@ -27,13 +21,6 @@ param(
 			Protocol = 'TCP'
 			LocalPort = 80
 			DependsOn = '[WindowsFeature]webServer'
-		}
-		cMMAgentInstall MMASetup
-		{
-			Path = 'http://go.microsoft.com/fwlink/?LinkID=517476'
-			Ensure = 'Present'
-			WorkspaceID = $WorkspaceID
-			WorkspaceKey = $WorkspaceKey
 		}
 	}
 }

@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "domainNameLabel": {
-            "value": "demoapp100"
+            "value": "demoapp101"
         },
         "vmssName": {
             "value": "srv"
