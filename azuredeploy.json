@@ -681,17 +681,18 @@
                     },
                     "rules": [
                     {
-                        "metricTrigger": {
-                        "metricName": "\\Processor\\PercentProcessorTime",
-                        "metricNamespace": "",
-                        "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]",
-                        "timeGrain": "PT1M",
-                        "statistic": "Average",
-                        "timeWindow": "PT5M",
-                        "timeAggregation": "Average",
-                        "operator": "GreaterThan",
-                        "threshold": 60.0
-                        },
+                        "metricTrigger":{
+                                   "metricName":"\\Processor(_Total)\\% Processor Time",
+                                   "metricNamespace":"",
+                                   "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('namingInfix'))]",
+                                   "timeGrain":"PT1M",
+                                   "statistic":"Average",
+                                   "timeWindow":"PT5M",
+                                   "timeAggregation":"Average",
+                                   "operator":"GreaterThan",
+                                   "threshold":50.0
+                               },
+
                         "scaleAction": {
                         "direction": "Increase",
                         "type": "ChangeCount",
@@ -700,17 +701,18 @@
                         }
                     },
                     {
-                        "metricTrigger": {
-                        "metricName": "\\Processor\\PercentProcessorTime",
-                        "metricNamespace": "",
-                        "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmssName'))]",
-                        "timeGrain": "PT1M",
-                        "statistic": "Average",
-                        "timeWindow": "PT5M",
-                        "timeAggregation": "Average",
-                        "operator": "LessThan",
-                        "threshold": 50.0
-                        },
+                        "metricTrigger":{
+                                   "metricName":"\\Processor(_Total)\\% Processor Time",
+                                   "metricNamespace":"",
+                                   "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('namingInfix'))]",
+                                   "timeGrain":"PT1M",
+                                   "statistic":"Average",
+                                   "timeWindow":"PT5M",
+                                   "timeAggregation":"Average",
+                                   "operator":"LessThan",
+                                   "threshold":50.0
+                               },
+
                         "scaleAction": {
                         "direction": "Decrease",
                         "type": "ChangeCount",
