@@ -46,7 +46,7 @@ Describe "Template: $template" -Tags Unit {
                                  'Microsoft.Compute/virtualMachineScaleSets',
                                  'Microsoft.Automation/automationAccounts',
                                  'Microsoft.Insights/autoscaleSettings'
-            $templateResources = (get-content "$here\azuredeploy.json" | ConvertFrom-Json -ErrorAction SilentlyContinue).Resources
+            $templateResources = (get-content "$here\azuredeploy.json" | ConvertFrom-Json -ErrorAction SilentlyContinue).Resources.type
             $templateResources | Should Be $expectedResources
         }
         
@@ -61,7 +61,7 @@ Describe "Template: $template" -Tags Unit {
                                               'ActionAfterReboot',
                                               'AllowModuleOverwrite',
                                               'Timestamp'
-            $dscExtensionProperties = (get-content "$here\azuredeploy.json" | ConvertFrom-Json -ErrorAction SilentlyContinue).Resources | ? type -eq Microsoft.Compute/virtualMachineScaleSets | % properties | % virtualMachineProfile | % extensionProfile | % extensions | % properties | % settings | % Properties | % Name
+            $dscExtensionProperties = (get-content "$here\azuredeploy.json" | ConvertFrom-Json -ErrorAction SilentlyContinue).Resources | ? type -eq Microsoft.Compute/virtualMachineScaleSets | % properties | % virtualMachineProfile | % extensionProfile | % extensions | ? name -eq dscExtension | % properties | % settings | % Properties | % Name
             $dscExtensionProperties | Should Be $expectedDscExtensionProperties
         }
     }
