@@ -1,7 +1,7 @@
 
 # VM Scale Set Configuration managed by Azure Automation DSC
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmgreenegit%2FARM-ScaleSetmanagedbyAADSC%2Fmaster%2Fazuredeploy.json)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fshilparamky5%2FARM-ScaleSetmanagedbyAADSC%2Fshilparamky5-patch-3%2Fazuredeploy.json)
 
 
 [![Build status](https://ci.appveyor.com/api/projects/status/4l7qavifq3v5ei7p?svg=true)](https://ci.appveyor.com/project/mgreenegit/arm-scalesetmanagedbyaadsc)
